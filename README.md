@@ -17,13 +17,14 @@ Throughout this tutorial the commands you will type are formatted into the gray 
 
 **Remember to tab complete!** There is a reason the tab is my favorite key. It prevents spelling errors and allows you to work much faster. Remember if a filename isn't auto-completing you can hit tab twice to see your files while you continue typing your command. If a file doesn't auto-complete it means you either have a spelling mistake, are in a different directory than you originally thought, or that it doesn't exist.
 
+
 ## Starting Data:
 Your starting data is found within a shared directory within your group folder (one directory level up). To start we will move a set of Sample data into your home directories. Each of these samples represent the genome of a unique and novel microbe that has not been seen before (except by me). Inside this directory are Illumina HiSeq 2500, paired-end, 250 bp sequencing reads. Looking in this directory you should see two files per sample, the forward and reverse reads. These files are in **FASTQ** format (see below).
 
 ```bash
 # Copy a sample from the shared directory to your home dir, 
 # USE AUTOCOMPLETE
-cp -r ../shared/Project_X/ Sample_X/ ./
+cp -r /home/genome/joseph7e/workshop_data_june15/remembertoautocompletecommands/raw-reads/Sample_X/ ./
 # confirm the copy arrived (remember ‘*’ will match any character/string)
 ls Sample_*/
 ```
@@ -39,10 +40,15 @@ Important note: In the above command I use the "\*" character to view the Sample
 It is a good idea to keep your directories tidy and to name your files something that makes sence. This is just to keep things organized so you know what everything is several months from now. We are going to make a new directory to house all of the analyses for this tutorial.
 
 ```bash
-# Make a new directory and add the Sample directory into it
-mkdir mdibl-t3-2019-WGS
-mv Sample* mdibl-t3-20189-WGS/
-cd mdibl-t3-2019-WGS/
+# Make a new directory
+mkdir genomics-tutorial/
+
+# move the sample data into the directory
+mv Sample* genomics-tutorial/
+
+# change into the directory
+cd genomics-tutorial/
+
 # make the sample directory name more meaningful
 mv Sample_X Sample_X-raw_reads
 ```
@@ -83,7 +89,7 @@ I always start by counting the number of reads I have for each sample. This is d
 
 ```bash
 # using grep. Note that I don't count just '@', this is because that symbol may appear in the quality lines.
-zgrep -c '@HSQ' Sample*/*R1*
+zgrep -c '^@' Sample*/*R1*
 # counting the lines and dividing by 4. Remember each read entry is exactly four lines long. These numbers should match.
 zcat Sample*/*_R1_* | wc -l
 ```
