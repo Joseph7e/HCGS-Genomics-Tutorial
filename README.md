@@ -9,32 +9,19 @@ Bacterial Genome Assembly and Assessment Tutorial
 
 This tutorial assumes a general understanding of the BASH environment. **You should be familiar with moving around the directories and understand how to manipulate files**.
 
+See the BASH tutorial to get started.
+
+https://github.com/Joseph7e/HCGS-BASH-tutorial
+
 Throughout this tutorial the commands you will type are formatted into the gray text boxes (don't do it when learning but they can be faithfully copied and pasted). The '#' symbol indicates a comment, BASH knows to ignore these lines. 
 
-**Remember to tab complete!** There is a reason the tab is my favorite key. It prevents spelling errors and allows you to work 10X faster (I timed it). Remember if a filename isn't auto-completing you can hit tab twice to see your files while you continue typing your command. If a file doesn't auto-complete it means you either have a spelling mistake, are in a different directory than you originally thought, or that it doesn't exist.
+**Remember to tab complete!** There is a reason the tab is my favorite key. It prevents spelling errors and allows you to work much faster. Remember if a filename isn't auto-completing you can hit tab twice to see your files while you continue typing your command. If a file doesn't auto-complete it means you either have a spelling mistake, are in a different directory than you originally thought, or that it doesn't exist.
 
 ## Starting Data:
 Your starting data is found within a shared directory within your group folder (one directory level up). To start we will move a set of Sample data into your home directories. Each of these samples represent the genome of a unique and novel microbe that has not been seen before (except by me). Inside this directory are Illumina HiSeq 2500, paired-end, 250 bp sequencing reads. Looking in this directory you should see two files per sample, the forward and reverse reads. These files are in **FASTQ** format (see below).
 
-* Get your bearing on the server.
-
-It's hard to know where your going if you don't know where you are. When I am working on the server I constantly type 'ls' and 'pwd' to make sure I am where I think I am. You should too!
-
 ```bash
-# print your current working directory. If you just logged in you should be in your home directory (/home/group/username/)
-pwd
-# change to your home directory in case you weren't already there. Remember ~/ is an absolute path to your home directory.
-cd ~/
-# ls to view your home dir
-ls
-# ls to view the group directory (I type ‘ls’ a lot!)
-ls ../
-# view the shared directory of starting data
-ls ../shared
-# View the shared project with the ‘tree’ command
-tree ../shared
 # Copy a sample from the shared directory to your home dir, 
-#“Project_X”, where X denotes the Project name and "Sample_X" (where X denotes your sample name).
 # USE AUTOCOMPLETE
 cp -r ../shared/Project_X/ Sample_X/ ./
 # confirm the copy arrived (remember ‘*’ will match any character/string)
