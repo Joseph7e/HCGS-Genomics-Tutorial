@@ -24,6 +24,9 @@ Isolate Bacteria            |  Extract DNA
 :-------------------------:|:-------------------------:
 ![alt text](https://github.com/Joseph7e/HCGS-Genomics-Tutorial/blob/master/petri.jpg?raw=true)  |  <img src="https://www.cephamls.com/wp-content/uploads/2019/02/DNA-Extraction-Figure-3-22.jpg" width="420">
 
+<img src="https://github.com/Joseph7e/HCGS-Genomics-Tutorial/blob/master/fragmentation.jpg?raw=true" width="420">
+
+
 Prepare Library           |  Sequence DNA
 :-------------------------:|:-------------------------:
 <img src="https://jef.works//assets/blog/librarystructure.png" width="520">  |  <img src="https://github.com/Joseph7e/HCGS-Genomics-Tutorial/blob/master/hiseq.png?raw=true" width="320">
@@ -197,7 +200,11 @@ Similar to above, you can run FASTQC again with your new trimmed reads. Comparin
 
 You can also count the number of reads for each of your files like you did for the raw reads. How does this compare to the original count? What percentage of your reads did you lose? How many reads are unpaired?
 
-## Genome Assembly w/ SPAdes
+## Genome Assembly
+
+<img src="https://www.genome.gov/sites/default/files/tg/en/illustration/shotgun_sequencing.jpg">
+
+
 manual: http://cab.spbu.ru/software/spades/
 
 alternative tools: [ABySS](http://www.bcgsc.ca/platform/bioinfo/software/abyss), [MaSuRCA](http://masurca.blogspot.com/)
