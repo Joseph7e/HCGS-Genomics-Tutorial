@@ -24,7 +24,7 @@ Isolate Bacteria            |  Extract DNA
 :-------------------------:|:-------------------------:
 ![alt text](https://github.com/Joseph7e/HCGS-Genomics-Tutorial/blob/master/petri.jpg?raw=true)  |  <img src="https://www.cephamls.com/wp-content/uploads/2019/02/DNA-Extraction-Figure-3-22.jpg" width="420">
 
-<img src="https://github.com/Joseph7e/HCGS-Genomics-Tutorial/blob/master/fragmentation.png?raw=true" width="900">
+<img src="https://github.com/Joseph7e/HCGS-Genomics-Tutorial/blob/master/fragmentation2.png?raw=true" width="900">
 
 
 Prepare Library           |  Sequence DNA
