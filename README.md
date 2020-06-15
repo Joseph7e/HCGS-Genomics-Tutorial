@@ -20,12 +20,13 @@ Throughout this tutorial the commands you will type are formatted into the gray 
 
 ## Starting Data:
 
+Isolate Bacteria            |  Extract DNA
+:-------------------------:|:-------------------------:
+![alt text](https://github.com/Joseph7e/HCGS-Genomics-Tutorial/blob/master/petri.jpg?raw=true)  |  <img src="https://www.cephamls.com/wp-content/uploads/2019/02/DNA-Extraction-Figure-3-22.jpg" width="420">
 
-
-![alt text](https://github.com/Joseph7e/HCGS-Genomics-Tutorial/blob/master/petri.jpg?raw=true)
-
-
-<img src="https://github.com/Joseph7e/HCGS-Genomics-Tutorial/blob/master/hiseq.png?raw=true" width="500">
+Prepare Library           |  Sequence DNA
+:-------------------------:|:-------------------------:
+<img src="https://jef.works//assets/blog/librarystructure.png" width="420">  |  <img src="https://github.com/Joseph7e/HCGS-Genomics-Tutorial/blob/master/hiseq.png?raw=true" width="420">
 
 
 Your starting data is found within a shared directory within your group folder (one directory level up). To start we will move a set of Sample data into your home directories. Each of these samples represent the genome of a unique and novel microbe that has not been seen before (except by me). Inside this directory are Illumina HiSeq 2500, paired-end, 250 bp sequencing reads. Looking in this directory you should see two files per sample, the forward and reverse reads. These files are in **FASTQ** format (see below).
