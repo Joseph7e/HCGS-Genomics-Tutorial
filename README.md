@@ -513,6 +513,8 @@ bedtools genomecov -ibam sorted_mapped.bam > coverage.out
 # Calculate per contig coverage with gen_input_table.py
 gen_input_table.py  --isbedfiles $fasta coverage.out >  coverage_table.tsv
 # This outputs a simple file with two columns, the contig header and the average coverage.
+# get average coverage of the genome
+python3 /home/genome/joseph7e/scripts/get_average_coverage.py coverage_table.tsv
 ```
 
 ## Non-target contig removal w/ Blobtools
