@@ -545,7 +545,7 @@ blobtools plot -i blob_out.blobDB.json -r genus
 ```
 The final table and plots can be exported to your computer to view. We will be using the table to decide which contigs to remove.
 
-![project_cherylandam-sample_lra1-contigs fasta blobdb json bestsum genus p7 span 100 blobplot spades](https://user-images.githubusercontent.com/18738632/42291330-0c6caf52-7f99-11e8-977d-4daf9321d2fe.png)
+![project_cherylandam-sample_lra1-contigs fasta blobdb json bestsum genus p7 span 100 blobplot spades](https://user-images.githubusercontent.com/18738632/42291330-0c6caf52-7f99-11e8-977d-4daf9321d2fe.pn)
 
 The x-axis on these plots is GC content, the y-axis is the coverage (log transformed). The size of the 'blobs' are the length of the contigs. Colors represent taxonomic assignment (the -r option lets you choose which rank to view). The concept of these plots and ultimately for assembly filtering is that each organism has a unique GC content. For example Streptomyces has an average GC content of about 0.72 while other bacteria can go as low as 0.2. In addition, contamination is most likely has much lower coverage compared to the rest of your assembly. Combine that with the taxonomic assignments and you have multiple lines of evidence to identify your non-target contigs. In the plot above you can fairly easily see what contigs we plan to remove.
 
