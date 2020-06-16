@@ -494,7 +494,7 @@ Many programs perform read mapping. The recommended program depends on what you 
 
 ```bash
 # Step 1: Index your reference genome. This is a requirement before read mapping.
-bwa index -a bwtsw $fasta
+bwa index $fasta
 # Step 2: Map the reads and construct a SAM file.
 bwa mem -M -t 24 $fasta $forward $reverse > raw_mapped.sam
 # view the file with less, note that to see the data you have to scroll down past all the headers (@SQ).
