@@ -400,4 +400,154 @@ The above command does a lot. It is a good idea to break it up and examine what 
 This is a good time to explore and make use of BASH. Hopefully everyone is getting used to working in BASH so they can explore as they want. Try to count the number of lines in the GFF that contain 'CDS'. How many tRNAs did we identify. etc. etc. We will be using more of these files later on in the tutorial.
 
 
+## Extract the 16S sequence from the FFN file.
+
+The 16S sequence is a housekeeping gene coding for the large ribosomal subunit in Bacteria. It is highly conserved and found in every known Bacteria. This makes it a great tool to identity the bacterium (which is why it is used in metabarcoding studies). This is (hopefully) one of the genes that were identified from PROKKA. It is not a protein so it won't be found in the FAA file but it should be in the FFN file. We are going to use a simple script we wrote that is available on the server and this github page called "extract_sequence". **The program requires two inputs, 1.) a string to search in the headers (just like grep), 2.) the PROKKA ffn file. The program will output the sequence to the screen so be sure to save it with '>'. 
+
+```bash
+# grep for 16S in the PROKKA annotations to see if it exists
+grep 16S prokka_output/*.ffn
+# run extract with an exact header
+extract_sequences "16S ribosomal RNA" prokka_output/PROKKA_*.ffn > 16S_sequence.fasta
+# check if it worked
+less -S 16S_sequence.fasta
+```
+
+# BLAST (Basic Local Alignment Search Tool)
+
+BLAST is one of the oldest and most fundamental bioinformatic tools available. If you have an unknown sequence it is usually my go to program to identify sequence similarity to a given reference set. At the heart of many programs, like PROKKA and BUSCO, they use BLAST as a primary tool to identify sequence homology. It can be run locally on the server or remotely on NCBI using their web server, we will go through both using simple functionality and examples. Keep in mind that this program has options that span books (literally). 
+
+There are different 'flavors' of BLAST. For example, **blastn** is used for searching a nucleotide query against a nucleotide reference, **blastp** is used to searching a protein query against a protein reference. etc. etc. These different types of BLASTs have different sorts of advantages. For example, at the protein level sequences tend to be more conserved, this means we can likely identify more distantly related sequences compared to a standard blastn. The BLAST flavor you choose is largely dependent on what sort of data you have.
+
+
+
+## NCBI Web BLAST
+
+https://blast.ncbi.nlm.nih.gov/Blast.cgi
+
+![blast_flavors](https://user-images.githubusercontent.com/18738632/42249024-d5b4a2be-7ef6-11e8-954b-e3b697876f83.png)
+
+We are going to provide the 16S sequence we just extracted from our prokka results and BLAST it against the complete set of reference nucleotide sequences (nt database) on NCBI in an attempt to identify its species origin. The nt database comprises all the sequences that have been submitted to genbank so if the species has been sequenced before we have a good chance of identifying the sequence. To start we need to click on the 'blastn' option from the link above, this is because we want to blast a nucleotide query sequence against a nucleotide database.
+
+You can copy and paste the 16S sequence directly into the page or input the file using the web form. Next you select teh database you want to BLAST against. By default it will use the complete collection of nucleotide sequences. You can change this to contain just 16S sequences or not. Both should hopefully give us the same answer. The rest of the options can be left to default and you can hit "BLAST".
+
+When it finishes you can scroll down to see your top hits in the database. The best matches are at the top. If you see matches that have high query coverage and sequence similarity you can be fairly confident in the taxonomic assignment and you now how a rough identification of your samples genus!
+
+
+## Command Line BLAST
+manual: https://www.ncbi.nlm.nih.gov/books/NBK279690/
+
+Using the command line BLAST works essentially the same as NCBI BLAST except we have more control. We can specify more options like output formats and also use our own local databases. It is also a lot more useful for pipelines and workflows since it can be automated, you don't need to open a web page and fill out any forms. 
+
+As a quick example for how BLAST works we will use the same 16S_sequence and BLAST it against our genome assembly.  Before we begin we will make a database out of our contig assembly. This is done to construct a set of files that BLAST can use to speed up its sequence lookup. In the end it means we have to wait less time for our results.
+
+* Make a BLAST db from your contig files
+
+The only required input is a FASTA file (our contigs), the database type (nucl or prot), and an output name for the new database.
+
+```bash
+makeblastdb -in contigs.fasta -dbtype nucl -out contigs_db 
+```
+
+## BLAST the 16S sequence against your contig database.
+
+As I mentioned BLAST has many options, too many to review here. Typically you will want to specify at least four options. The first is your query sequence, the sequence we are trying to locate in our assembly. Next is the 'db', this is our database we just created from our assembly. Third is the name of the output file, use something informative. And finally we specify the output format. There are many options but the most common is output format '6' which is a simple tab delimited file. This output format is often the one required by external programs and is completely customization. You can specify what sorts of columns you want to provide, default is 'qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore'. This is usually good enough but all these details can be seen in the help menu.
+
+If there are mutliple hits for a single query BLAST will provide all of them by default. These hits will be organized by bitscore, which is a measure of our confidence in the match. Bit-score is a combination of match length and sequence similarity. It is up to the user (or an external program) to parse through this file and determine which hits are meaningful
+
+```bash
+# examine the help menu, specifically look at the section about outfmt to see the available columns with explanations.
+blastn -help
+# run BLAST
+blastn -query 16S_sequence.fasta -db contigs_db -out 16S_vs_contigs_6.tsv -outfmt 6
+# view the results
+tabview 16S_vs_contigs_6.tsv
+
+```
+
+Since this 16S sequence was derived from this assembly you should see a perfect 100% identity match spanning about 1500 nucleotides. 
+
+
+## BLAST the entire assembly against the nt database.
+
+We store a local copy of the complete nucleotide database on our server. We will be using this to provide a rough taxonomy to every sequence in our assembly and to ultimately identify non-target contaminates (like human and other bacteria) and to confirm our species identification from the 16S BLAST. Later we will be using the output file as in input to  blobtools and to visualize this information. blobtools requires a specifically formatted BLAST file, I therefore provide a script that will run the BLAST to the programs specification. We will simply provide the script with our contigs file and it will complete the task. This is a simple script that is not much different than the example we ran above. It will automatically format a meaningfull output name. 
+
+```bash
+# run the scipt, note that it will automatically use nohup since it will take about 30 minutes to run
+blob_blast.sh contigs.fasta
+# view the reuslts, the last column is the species identification
+tabview contigs.fasta.vs.nt.cul5.1e5.megablast.out
+```
+
+We will leave this BLAST file for now but will come back to it when we are ready to run blobtools. blobtools requires two input files, the BLAST results and a mapping file (SAM/BAM) which we will generate next.
+
+
+## Read Mapping w/ BWA and samtools
+
+BWA manual: http://bio-bwa.sourceforge.net/bwa.shtml
+
+samtools manual: http://www.htslib.org/doc/samtools-1.2.html
+
+Read Mapping refers to the process of aligning short reads to a reference sequence. This reference can be a complete genome, a transcriptome, or in our case de novo assembly. Read mapping is fundamental to many commonly used pipelines like differential expression or SNP analysis. We will be using it to calculate the average coverage of each of our contigs and to calculate the overall coverage of our genome (a requirement for genbank submission).The main output of read mapping is a Sequence Alignment Map format (SAM). The file provides information about where our sequencing reads match to our assembly and information about how it maps. There are hundreds of programs that use SAM files as a primary input. A BAM file is the binary version of a SAM, and can be converted very easily using samtools. 
+
+SAM format specifications: https://samtools.github.io/hts-specs/SAMv1.pdf
+
+Many programs perform read mapping. The recommended program depends on what you are trying to do. My favorite is 'BWA mem' which balances performance and accuracy well. **The input to the program is a referece assembly and reads to map (forward and reverse). The output is a SAM file**. By default BWA writes the SAM file to standard output, I therefore save it directly to a file. There are lots of options, please see the manual to understand what I am using.
+
+* Map Reads to your assembly
+
+```bash
+# Step 1: Index your reference genome. This is a requirement before read mapping.
+bwa index -a bwtsw $fasta
+# Step 2: Map the reads and construct a SAM file.
+bwa mem -M -t 24 $fasta $forward $reverse > raw_mapped.sam
+# view the file with less, note that to see the data you have to scroll down past all the headers (@SQ).
+less -S raw_mapped.sam
+# Examine how many reads mapped with samtools
+samtools flagstat raw_mapped.sam
+```
+
+* Construct a coverage table using samtools and other programs.
+
+```bash
+# Remove sequencing reads that did not match to the assembly and convert the SAM to a BAM.
+samtools view -@ 24 -Sb -F 4  raw_mapped.sam  | samtools sort -@ 24 - -o sorted_mapped.bam
+# Calculate per base coverage with bedtools
+bedtools genomecov -ibam sorted_mapped.bam > coverage.out
+# Calculate per contig coverage with gen_input_table.py
+gen_input_table.py  --isbedfiles $fasta coverage.out >  coverage_table.tsv
+# This outputs a simple file with two columns, the contig header and the average coverage.
+```
+
+## Non-target contig removal w/ Blobtools
+blobtools manual: https://blobtools.readme.io/docs
+
+Blobtools is a tool to visualize our genome assembly. It is also useful for filtering read and assembly data sets. **There are three main inputs to the program: 1.) Contig file (the one we used for BLAST and BWA), 2.) a 'hits' file generated from BLAST, 3.) A SAM or BAM file. The main output of the program are blobplots which plot the GC, coverage, taxonomy, and contigs lengths on a single graph.** 
+
+The first step (blobtools create) in this short pipeline takes all of our input files and creates a lookup table that is used for plotting and constructing tables. This step does the brunt of the working, parsing the BLAST file to assign taxonomy to each of our sequences, and parsing the SAM file to calculate coverage information.
+
+After that is complete we will use 'blobtools view' to output all the data into a human readable table. Finally we will use 'blobtools plot' to construct the blobplot visuals.
+
+* Run the blobtools pipeline.
+
+```bash
+# Create lookup table
+blobtools create --help
+blobtools create -i contigs.fasta -b raw_mapped.sam -t contigs.fasta.vs.nt.cul5.1e5.megablast.out -o blob_out
+# Create output table
+blobtools view --help
+blobtools view -i blob_out.blobDB.json -r all -o blob_taxonomy
+# view the table, I remove headers with grep -v and view with tabview
+grep -v '##' blob_taxonomy.blob_out.blobDB.table.txt
+# Plot the data
+blobtools plot --help
+blobtools plot -i blob_out.blobDB.json -r genus
+```
+The final table and plots can be exported to your computer to view. We will be using the table to decide which contigs to remove.
+
+![project_cherylandam-sample_lra1-contigs fasta blobdb json bestsum genus p7 span 100 blobplot spades](https://user-images.githubusercontent.com/18738632/42291330-0c6caf52-7f99-11e8-977d-4daf9321d2fe.png)
+
+The x-axis on these plots is GC content, the y-axis is the coverage (log transformed). The size of the 'blobs' are the length of the contigs. Colors represent taxonomic assignment (the -r option lets you choose which rank to view). The concept of these plots and ultimately for assembly filtering is that each organism has a unique GC content. For example Streptomyces has an average GC content of about 0.72 while other bacteria can go as low as 0.2. In addition, contamination is most likely has much lower coverage compared to the rest of your assembly. Combine that with the taxonomic assignments and you have multiple lines of evidence to identify your non-target contigs. In the plot above you can fairly easily see what contigs we plan to remove.
+
+
 ... more to come
