@@ -530,11 +530,16 @@ After that is complete we will use 'blobtools view' to output all the data into 
 
 ```bash
 # Create lookup table
+# activate the blobtools environment
+conda activate blobtools_env
+
 blobtools create --help
 blobtools create -i contigs.fasta -b raw_mapped.sam -t contigs.fasta.vs.nt.cul5.1e5.megablast.out -o blob_out
+
 # Create output table
 blobtools view --help
 blobtools view -i blob_out.blobDB.json -r all -o blob_taxonomy
+
 # view the table, I remove headers with grep -v and view with tabview
 grep -v '##' blob_taxonomy.blob_out.blobDB.table.txt
 # Plot the data
