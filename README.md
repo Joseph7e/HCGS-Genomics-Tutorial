@@ -636,3 +636,7 @@ Depending on how you answer these questions you may have to go back and adjust y
  
 ## Plot showing the N50 and genome sizes of Streptomyces genomes on genbank.
 ![streptomyces_genome_paper](https://user-images.githubusercontent.com/18738632/42292594-9b1a437e-7fa1-11e8-8a2e-b39fc9cfdcaf.jpg)
+
+
+Want more?
+https://github.com/Joseph7e/MDIBL-T3-WGS-Comparative
