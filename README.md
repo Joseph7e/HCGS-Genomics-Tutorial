@@ -3,7 +3,7 @@
 Bacterial Genome Assembly and Assessment Tutorial
 
 **This site will be continuously updated throughout the week.**
-[Go to where we left off](#non-target-contig-removal-w/-blobtools)
+[Go to where we left off](#blast-the-entire-assembly-against-the-nt-database)
 
 ### General Notes:
 **For each program that we run in this tutorial I have provided a link to the manual**. These manuals provide a thorough explanation of what exactly we are doing. Before running the program it is a good idea to skim through these, examine the options, and see what it does. It is also a good idea to check out the publication associated with the program. Please note that the commands we run are general and are usually executed with default settings. This works great for most genomes but the options may need to be tweaked depending on your genome. Before you run any command it is also a great idea to look at the programs help menu. This can usually be done with the name of the program followed by '-h' or '-help' or '--help'. i.e. 'spades -h'. Also ... never forget about google for quick answers to any confusion.
@@ -547,5 +547,87 @@ The final table and plots can be exported to your computer to view. We will be u
 
 The x-axis on these plots is GC content, the y-axis is the coverage (log transformed). The size of the 'blobs' are the length of the contigs. Colors represent taxonomic assignment (the -r option lets you choose which rank to view). The concept of these plots and ultimately for assembly filtering is that each organism has a unique GC content. For example Streptomyces has an average GC content of about 0.72 while other bacteria can go as low as 0.2. In addition, contamination is most likely has much lower coverage compared to the rest of your assembly. Combine that with the taxonomic assignments and you have multiple lines of evidence to identify your non-target contigs. In the plot above you can fairly easily see what contigs we plan to remove.
 
+## Filter the genome assembly:
 
-... more to come
+Take your time with this step. There is no exact set of commands that will work with everyones genome. When in doubt about a specific contig I tend to favor keeping it rather than removing it. I start by doing a strict length cutoff of 500 bp long contigs (some sequencing centers are more strict, not allowing any contigs < 1000 or even 5000 bp long.
+
+Column headers we will use. #2 == length, #3 == GC content, #5 == Coverage, #15 == family, #18 == genus. 
+
+I am going to take this one step at a time and construct a final contig list ones we are happy with the cutoff values we choose. I will mainly be using 'awk' to do this filtering, you could also do it in excel. For awk, the '-F' options sets the field separator (\t for a tsv), next we can call individual columns using $ + column_number.
+
+* Filter by length
+
+```bash
+# make a directory for filtering
+mkdir ~/mdibl-t3-2018-WGS/filtered_assembly
+cd ~/mdibl-t3-2018-WGS/filtered_assembly
+# copy the taxonomy table
+cp ~/~/mdibl-t3-2018-WGS/blob_taxonomy.blob_out.blobDB.table.txt ./
+# Filter by length
+grep -v '#' blob_taxonomy.blob_out.blobDB.table.txt | awk -F'\t' '$2 > 500' | tabview -
+# You can always do the opposite to examine what you are losing, do this every time
+grep -v '#' blob_taxonomy.blob_out.blobDB.table.txt | awk -F'\t' '$2 < 500' | tabview -
+# You can check how many contigs are retained with the 'wc' command which counts lines.
+grep -v '#' blob_taxonomy.blob_out.blobDB.table.txt | awk -F'\t' '$2 > 500' | wc
+grep -v '#' blob_taxonomy.blob_out.blobDB.table.txt | awk -F'\t' '$2 < 500' | wc
+```
+
+* Also filter by coverage.
+
+Keeping the command we used above I am now adding some options based on column number 5, the coverage.
+
+```bash
+# Start with a low number and check what you will lose (I'll try 5)
+grep -v '#' blob_taxonomy.blob_out.blobDB.table.txt | awk -F'\t' '$2 > 500' | awk -F'\t' '$5 > 5}' | tabview -
+# Check what I am losing by doing the opposite
+grep -v '#' blob_taxonomy.blob_out.blobDB.table.txt | awk -F'\t' '$2 > 500' | awk -F'\t' '$5 < 5}' | tabview -
+# Check how many we lose
+grep -v '#' blob_taxonomy.blob_out.blobDB.table.txt | awk -F'\t' '$2 > 500' | awk -F'\t' '$5 < 5}' | wc
+# Try a higher value
+grep -v '#' blob_taxonomy.blob_out.blobDB.table.txt | awk -F'\t' '$2 > 500' | awk -F'\t' '$5 > 15}' | tabview -
+# turns out this makes no difference.
+```
+Hopefully at some point you will be happy with what you decide for a filtering criteria. Be sure to carefully check what you are throwing away. Do any of the contigs still have the non-target taxonomy assigned? Are you losing anything that has the right taxonomy? If you notice contigs that are obviously contamination how can the filtering options be adjusted to remove these but not out targets? Do you need to add a taxonomy or GC based filter?
+
+Assuming we have carefully selected our criteria we are ready to construct a list of contigs to keep. This list will be provided to a program to construct a new filtered FASTA file.
+
+## Construct a list of contigs we want to keep.
+
+ Our current table has many columns. We want just the first column which are contig headers. You will start with the same command you selected for filtering criteria and add an option to just print the first column. Notice the output name that I choose. It should reflect what we use as a filterig criteria.
+ 
+ ```bash
+ # use awk to constuct list, the new part is the final part of the command which will only print the first column.
+ grep -v '##' blob_taxonomy.blob_out.blobDB.table.txt | awk -F'\t' '$2 > 500' | awk -F'\t' '$5 > 20}' | tabview -
+ grep -v '##' blob_taxonomy.blob_out.blobDB.table.txt | awk -F'\t' '$2 > 500' | awk -F'\t' '$5 > 20' | awk -F'\t' '{print $1}' > list_of_contigs_to_keep_len500_cov20.txt
+ # view the file to make sure it is a list of contig headers
+ less -S list_of_contigs_to_keep_len500_cov20.txt
+ ```
+
+ ## Filter your assembly based on a list of contigs.
+ 
+ I have created a script that takes three arguments. An original FASTA file, a list of headers we want to keep, and an output name for the new FASTA. Be sure to give your final file a meaningful name. Usually somehting like the species name followed by the sample/strain id.
+ 
+ ```bash
+ filter_contigs_by_list.py ~/mdibl-t3-WGS/spades_assembly/contigs.fasta list_of_contigs_to_keep_len500_cov20.txt Streptomyces_A1277_filtered.fasta
+ ```
+ 
+ ## Average coverage from Blobtools table.
+
+```
+# Coverage from blob table
+# remove the initial grep if you want the average coverage for all the contigs
+grep -f list_to_keep.txt blob_taxonomy.blob_out.blobDB.table.txt | awk '{w = w + $2; e = e + $5 * $2;} END {print e/w}'
+```
+ 
+ # FINISHED!!!!
+ 
+ ## Afterthoughts
+ 
+ We should now have a cleaned genome assembly that is ready for downstream analyses like submission to NCBI and comparative genomics. 
+ 
+It is a good idea to check how the filtering affected your final assembly. Run QUAST again. What is your total genome size? Is it in the range of previously published genomes. Run BUSCO again. Do you get the same results? How does it differ? Reconstruct a blobplot using your new filtered data set. Does it look clean? Are there still some contigs that look like they should be removed?
+
+Depending on how you answer these questions you may have to go back and adjust your filtering criteria.
+ 
+## Plot showing the N50 and genome sizes of Streptomyces genomes on genbank.
+![streptomyces_genome_paper](https://user-images.githubusercontent.com/18738632/42292594-9b1a437e-7fa1-11e8-8a2e-b39fc9cfdcaf.jpg)
