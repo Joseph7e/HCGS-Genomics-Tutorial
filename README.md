@@ -39,16 +39,15 @@ Your starting data is found within a shared directory within your group folder (
 
 #make sure you start in the home dir
 cd
-mkdir genomics_workshop
-cd genomics_workshop
-
-mkdir raw-reads
-cd raw-reads/
+mkdir Sample_data
+cd Sample_data/
 
 # copy data, be sure to replace SAMPLE# with your data
 cp -r /home/genome/joseph7e/workshop_data_june22nd/remembertoautocompletecommands/raw-reads/*_SAMPLE#_* ./
 # confirm the copy arrived (remember ‘*’ will match any character/string)
 ls
+
+# go back home
 ```
 
 [Link explaining the 'Read Name Format'](http://support.illumina.com/content/dam/illumina-support/help/BaseSpaceHelp_v2/Content/Vault/Informatics/Sequencing_Analysis/BS/swSEQ_mBS_FASTQFiles.htm): SampleName_Barcode_LaneNumber_001.fastq.gz
@@ -66,7 +65,7 @@ It is a good idea to keep your directories tidy and to name your files something
 mkdir genomics-tutorial/
 
 # move the sample data into the directory
-mv Sample* genomics-tutorial/
+mv Sample_data/ genomics-tutorial/
 
 # change into the directory
 cd genomics-tutorial/
