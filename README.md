@@ -362,6 +362,9 @@ ls run_busco_output/single_copy_busco_sequences/
 ## Genome Annotation w/ PROKKA
 manual: https://github.com/tseemann/prokka
 
+paper: https://academic.oup.com/bioinformatics/article/30/14/2068/2390517
+
+
 alternative tools: [NCBI PGA](https://www.ncbi.nlm.nih.gov/genbank/genomesubmit_annotation/), [Glimmer](https://ccb.jhu.edu/software/glimmer/)
 
 ![prokka_workflow](https://user-images.githubusercontent.com/18738632/42130490-e45251b6-7cb4-11e8-99ef-9579b9b7ce05.png)
